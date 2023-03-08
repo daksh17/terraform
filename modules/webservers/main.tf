@@ -1,6 +1,6 @@
-resource "aws_default_security_group" "daksh_default_sg" {
+resource "aws_security_group" "daksh_sg" {
 
-  # name   = "daksh-default-sg"
+   name   = "daksh-sg"
   vpc_id = var.vpc_id
 
   ingress {
@@ -84,14 +84,14 @@ public_key = file(var.public_key_location)
    
    subnet_id = var.subnet_id   // refrence the output of module daksh_subnet 
 
-   vpc_security_group_ids = [ aws_default_security_group.daksh_default_sg.id ]
+   vpc_security_group_ids = [ aws_security_group.daksh_sg.id ]
 
    availability_zone = var.avail_zone
    associate_public_ip_address = true
     key_name = aws_key_pair.ssh_key.key_name
    
    
-   user_data =  file("./entry-script.sh")
+   user_data =  file("entry-script.sh")
 /*
     connection { 
 
