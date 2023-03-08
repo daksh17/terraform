@@ -1,3 +1,18 @@
+terraform {
+
+
+  required_version =">=0.12"
+  backend "s3" {
+
+bucket ="daksh-bucket17"
+key="daksh/state.tfstate"
+region="eu-central-1"
+
+  }
+}
+
+
+
 
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
