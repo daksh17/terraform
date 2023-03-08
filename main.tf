@@ -1,28 +1,26 @@
 
-resource "aws_vpc" "daksh_vpc" {
+module "vpc" {
+  source = "terraform-aws-modules/vpc/aws"
 
-  cidr_block = var.cidr_blocks
+  name = "my-vpc"
+  cidr = var.cidr_blocks
+
+  azs             = [var.avail_zone]
+ # private_subnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
+  public_subnets  = [var.subnet_cidr_blocks]
+
+public_subnet_tags= { name = "${var.env_prefix}-subnet-1"}
   tags = {
-    Name : "${var.env_prefix}-vpc"
+    name = "${var.env_prefix}-vpc"
+    Environment = "dev"
   }
-}
 
-
-//call one module (subnet contain the terraform related ) in main.tf file and also make sure those variable which we need are define in main.tf which 
-
-module "daksh-subnet"{
-
-source = "./modules/subnet"
-subnet_cidr_blocks  = var.subnet_cidr_blocks
-avail_zone = var.avail_zone
-env_prefix = var.env_prefix
-vpc_id = aws_vpc.daksh_vpc.id
-default_route_table_id=aws_vpc.daksh_vpc.default_route_table_id
 
 }
 
 
-//call one module (webserver contain the terraform related ) in main.tf file and also make sure those variable which we need are define in main.tf which 
+
+
 
 
 module "daksh-server"{
@@ -31,68 +29,16 @@ source = "./modules/webservers"
  #subnet_cidr_blocks=var.subnet_cidr_blocks
  my_ip=var.my_ip
  env_prefix=var.env_prefix
- vpc_id= aws_vpc.daksh_vpc.id
+ vpc_id= module.vpc.vpc_id
  image_name=var.image_name
  public_key_location=var.public_key_location
  instance_type=var.instance_type
  avail_zone=var.avail_zone
  #private_key_location=var.private_key_location
-subnet_id = module.daksh-subnet.web-subnet.id
+subnet_id = module.vpc.public_subnets[0]
 
 }
 
 
-
-/* resource "aws_route_table_association" "daksh_rt_subnet_assoc"{
-
-subnet_id = aws_subnet.daksh_subnet_1.id
-route_table_id = aws_route_table.daksh-route-table.id
-
-}*/
-
-
-
-resource "aws_security_group" "daksh_sg" {
-
-  name   = "daksh-sg"
-  vpc_id = aws_vpc.daksh_vpc.id
-
-  ingress {
-
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = [var.my_ip]
-
-  }
-
-
-  ingress {
-
-    from_port   = 8080
-    to_port     = 8080
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-
-  }
-
-
-
-  egress {
-
-    from_port       = 0
-    to_port         = 0
-    protocol        = "-1"
-    cidr_blocks     = ["0.0.0.0/0"]
-    prefix_list_ids = []
-
-  }
-
-  tags = {
-
-    Name : "${var.env_prefix}-sg"
-  }
-
-}
 
 
