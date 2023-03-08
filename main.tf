@@ -206,11 +206,16 @@ filter {
 
 
 
-/* output "aws_ami_id"{
+ output "aws_ami_id"{
 
-  value = data.aws_ami.latest_aws_linux_image
+  value = data.aws_ami.latest_aws_linux_image.image_id
 }
-*/
+
+
+ output "aws_ec2_publicIP"{
+
+  value = aws_instance.daksh_instance.public_ip
+  }
 
 
 resource "aws_key_pair" "ssh_key"{
@@ -235,15 +240,9 @@ public_key = file(var.public_key_location)
    availability_zone = var.avail_zone
    associate_public_ip_address = true
     key_name = aws_key_pair.ssh_key.key_name
-   user_data =  <<EOF
+   user_data =  file("entry-script.sh")
 
-                  #!/bin/bash
-                  sudo yum update -y && sudo yum install -y docker
-                  sudo systemctl start docker
-                  sudo  usermod -aG docker ec2-user
-                  docker run -p 8080:80 nginx
-                EOF
-
+ 
  tags = {
 
     Name : "${var.env_prefix}-default-inst"
