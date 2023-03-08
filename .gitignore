@@ -7,3 +7,6 @@
 
 # variable file, may include sen data
 *.tfvars
+
+#crashloop file 
+crash.log
